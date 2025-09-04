@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Volume2, Shuffle, RotateCw } from 'lucide-react';
 import kaboom from 'kaboom';
+import { SnowEffect } from '@/components/ui/snow-effect';
 
 export default function PenguinApp() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -44,7 +45,7 @@ export default function PenguinApp() {
 
     // Add penguin belly (white)
     const belly = k.add([
-      k.ellipse(25, 35),
+      k.rect(50, 70, { radius: 25 }),  // Using a rounded rectangle instead
       k.color(255, 255, 255),
       k.pos(k.width() / 2, k.height() / 2 + 5),
       k.anchor('center'),
@@ -75,14 +76,14 @@ export default function PenguinApp() {
 
     // Add feet
     const leftFoot = k.add([
-      k.ellipse(8, 4),
+      k.rect(16, 8, { radius: 4 }),  // Using a rounded rectangle for feet
       k.color(255, 165, 0),
       k.pos(k.width() / 2 - 15, k.height() / 2 + 35),
       k.anchor('center'),
     ]);
 
     const rightFoot = k.add([
-      k.ellipse(8, 4),
+      k.rect(16, 8, { radius: 4 }),  // Using a rounded rectangle for feet
       k.color(255, 165, 0),
       k.pos(k.width() / 2 + 15, k.height() / 2 + 35),
       k.anchor('center'),
@@ -143,7 +144,18 @@ export default function PenguinApp() {
 
     return () => {
       if (gameRef.current) {
-        gameRef.current.destroy();
+        // Clean up game objects
+        penguinParts.forEach(part => {
+          if (part && part.destroy) {
+            part.destroy();
+          }
+        });
+        
+        // Clean up event listeners
+        (window as any).penguinWaddle = null;
+        (window as any).penguinHop = null;
+        
+        // Clear the game instance
         gameRef.current = null;
       }
     };
@@ -167,28 +179,7 @@ export default function PenguinApp() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-200 via-blue-100 to-white relative overflow-hidden">
       {/* Animated falling snow */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(50)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full opacity-70"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: -10,
-            }}
-            animate={{
-              y: window.innerHeight + 10,
-              x: Math.random() * window.innerWidth,
-            }}
-            transition={{
-              duration: Math.random() * 3 + 2,
-              repeat: Infinity,
-              ease: 'linear',
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
+      <SnowEffect />
 
       <div className="relative z-10 container mx-auto px-4 py-8">
         <motion.div
